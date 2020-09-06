@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.connection.MyConnection;
- 
+import com.exception.ProductNotFoundException;
 import com.pojo.Product;
 
 public class ProductDAOImpl implements ProductDAO {
@@ -28,10 +28,24 @@ public class ProductDAOImpl implements ProductDAO {
 					ps.setString(5, product.getCategory());
 
 					added = ps.executeUpdate();
+					
+					if(added>0)
+					{
+						System.out.println("Product inserted Successfully");
+
+					}
+					else
+					{
+						throw new ProductNotFoundException("Unable to insert product!!");
+
+					}
 
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
+				 catch (ProductNotFoundException e) {
+						 e.printStackTrace();
+					}
 				return added;
 	}
 
@@ -44,11 +58,21 @@ public class ProductDAOImpl implements ProductDAO {
 			PreparedStatement ps = MyConnection.getConnection().prepareStatement(updateData);
 			ps.setDouble(1, price);
 			ps.setInt(2, productId);
-			ps.executeUpdate();
-			updated=true;
+			int res=ps.executeUpdate();
+			if(res>0)
+			{
+				updated=true;
+		    }	
+			else
+			{
+				throw new ProductNotFoundException("Unable to update the product!!");
+			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+		catch (ProductNotFoundException e) {
+			 e.printStackTrace();
 		}
 		return updated;
 	}
@@ -63,11 +87,22 @@ public class ProductDAOImpl implements ProductDAO {
 			PreparedStatement ps = MyConnection.getConnection().prepareStatement(updateData);
 			ps.setInt(1, quantity);
 			ps.setInt(2, productId);
-			ps.executeUpdate();
-			updated=true;
+			int res=ps.executeUpdate();
+			
+			if(res>0)
+			{
+				updated=true;
+		    }	
+			else
+			{
+				throw new ProductNotFoundException("Unable to update the product!!");
+			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+		catch (ProductNotFoundException e) {
+			 e.printStackTrace();
 		}
 		return updated;
 	}
@@ -91,6 +126,14 @@ public class ProductDAOImpl implements ProductDAO {
 				String category = set.getString("category");
 				prod = new Product(pid, pname, price, quantity,category);
 
+			}
+			if (prod.getpId() == 0) {
+				try {
+					throw new ProductNotFoundException(
+							"Unable to find the product with given id!!");
+				} catch (ProductNotFoundException e) {
+ 					e.printStackTrace();
+				}
 			}
 
 		} catch (SQLException e) {
@@ -121,9 +164,14 @@ public class ProductDAOImpl implements ProductDAO {
 						prod.add(p);
 
 					}
+					if (prod.size() == 0) {
+						throw new ProductNotFoundException("There are no products available!!");
+					}
 
 				} catch (SQLException e) {
 					e.printStackTrace();
+				} catch (ProductNotFoundException e) {
+				 e.printStackTrace();
 				}
 				return prod;
 
@@ -152,9 +200,14 @@ public class ProductDAOImpl implements ProductDAO {
 				prod.add(p);
 
 			}
+			if (prod.size() == 0) {
+				throw new ProductNotFoundException("There are no products available for given category");
+			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} catch (ProductNotFoundException e) {
+ 			e.printStackTrace();
 		}
 		return prod;
 		
@@ -170,11 +223,22 @@ public class ProductDAOImpl implements ProductDAO {
 		try {
 			PreparedStatement ps = MyConnection.getConnection().prepareStatement(deleteData);
 			ps.setInt(1, productId);
-			ps.executeUpdate();
-			deleted=true;
+			int del=ps.executeUpdate();
+			if(del>0)
+			{
+				deleted=true;
+		    }	
+			else
+			{
+				throw new ProductNotFoundException("Unable to delete the product!!");
+			}
+				
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+		catch (ProductNotFoundException e) {
+			 e.printStackTrace();
 		}
 		return deleted;
 	}
